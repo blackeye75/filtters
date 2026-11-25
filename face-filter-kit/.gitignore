@@ -1,0 +1,8 @@
+node_modules/
+dist/
+web/public/mediapipe/
+web/test/out/
+web/test/fixtures/
+tools/android-stubcheck/.build/
+tools/android-stubcheck/.cache/
+*.task

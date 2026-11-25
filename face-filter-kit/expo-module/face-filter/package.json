@@ -1,0 +1,12 @@
+{
+  "name": "face-filter",
+  "version": "0.1.0",
+  "description": "Frame-synchronous beauty / makeup filter for react-native-webrtc (Expo module)",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "peerDependencies": {
+    "expo": "*",
+    "react-native": "*",
+    "react-native-webrtc": ">=118.0.0"
+  }
+}

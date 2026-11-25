@@ -1,0 +1,24 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'   // Expo SDK 52+ module plugin (Kotlin, expo-modules-core wiring)
+}
+
+group = 'expo.modules.facefilter'
+version = '0.1.0'
+
+android {
+  namespace "expo.modules.facefilter"
+  defaultConfig {
+    minSdkVersion 24          // GLES 3.0 is universal on Android 7+ phones
+    versionCode 1
+    versionName "0.1.0"
+  }
+  lintOptions { abortOnError false }
+}
+
+dependencies {
+  // ProcessorProvider / VideoFrameProcessor and org.webrtc.* come from react-native-webrtc
+  compileOnly project(':react-native-webrtc')
+  // Pin the exact version you test with (check Maven Central for the newest release).
+  implementation 'com.google.mediapipe:tasks-vision:0.10.26'
+}

@@ -1,0 +1,1 @@
+package android.graphics; public class BitmapFactory { public static class Options { public boolean inPremultiplied; public boolean inScaled; } public static Bitmap decodeStream(java.io.InputStream is, Rect r, Options o){return null;} }
