@@ -1,6 +1,0 @@
-{
-  "framework": null,
-  "installCommand": "cd face-filter-kit/web && npm ci",
-  "buildCommand": "cd face-filter-kit/web && npm run setup && npm run build",
-  "outputDirectory": "face-filter-kit/web/dist"
-}
