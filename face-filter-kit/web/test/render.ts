@@ -1,6 +1,7 @@
 // Headless GPU test of the shared render graph with synthetic faces (no camera, no model).
 import { GLRenderer, type FaceGeometry } from "../src/engine/GLRenderer";
-import { DEFAULT_PARAMS, PRESETS, type FilterParams } from "../src/engine/types";
+import { DEFAULT_PARAMS, PRESETS, presetParams, type FilterParams } from "../src/engine/types";
+import { buildWarps, MAX_WARPS } from "../src/engine/warp";
 import { GROUPS } from "../src/engine/faceMeshData";
 
 type Fixture = { width: number; height: number; landmarks: number[][] };
@@ -55,7 +56,18 @@ async function run() {
     const filtered = canvas.toDataURL("image/png");
     r.render(params, geo, { fade: 1, split: 0, debugMasks: true, flipY: true });
     const masks = canvas.toDataURL("image/png");
-    results[name] = { before, after, filtered, masks, glError: gl.getError() };
+    // full looks (makeup + reshape + grade); warps need landmarks in pixels
+    const pxPts = new Float32Array(468 * 3);
+    for (let i = 0; i < 468; i++) { pxPts[i * 3] = geo.points[i * 3] * W; pxPts[i * 3 + 1] = geo.points[i * 3 + 1] * H; }
+    const looks: Record<string, string> = {};
+    for (const look of ["Sunkissed", "Golden Hour", "Soft Glam", "Doll", "Clean Girl", "Sculpt"]) {
+      const lp = presetParams(PRESETS[look]);
+      const warpA = new Float32Array(MAX_WARPS * 4), warpB = new Float32Array(MAX_WARPS * 2);
+      const warpCount = buildWarps(pxPts, geo.iodPx, lp.shape, 1, warpA, warpB);
+      r.render(lp, { ...geo, warpA, warpB, warpCount }, { fade: 1, split: 0, debugMasks: false, flipY: true });
+      looks[look] = canvas.toDataURL("image/png");
+    }
+    results[name] = { before, after, filtered, masks, looks, glError: gl.getError() };
   }
   (window as unknown as { __results: unknown }).__results = results;
 }

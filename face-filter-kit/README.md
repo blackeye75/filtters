@@ -34,7 +34,8 @@ shared/                ONE source of truth used by every platform
   face_mesh.json         468 UVs, 852 render triangles (mouth/eye interiors removed), landmark groups
   makeup_atlas.png       UV-space masks: R lips, G blush, B skin   (designers can repaint it)
   uv_template.png        wireframe for designers painting new looks
-  presets.json           Natural, Rose, Berry, Coral, Nude, Red
+  presets.json           makeup: Natural, Rose, Berry, Coral, Nude, Red; full looks (makeup + face shape + tone):
+                         Sunkissed, Golden Hour, Soft Glam, Doll, Clean Girl, Sculpt
 web/                   preview app + reference engine (TypeScript, WebGL2, MediaPipe Tasks)
   src/engine/            FaceFilterEngine, GLRenderer, OneEuro, outputStream (MediaStream for web calls)
   test/                  One Euro unit tests, headless GPU render test with synthetic faces
@@ -70,6 +71,7 @@ python3 test/make_synthetic_face.py && node test/render-test.mjs   # headless GP
 
 | Part | State |
 | --- | --- |
+| Face shape + tone | Web only (warp unit-tested fold-free, render test covers every look). Not ported to Android/iOS yet |
 | Web engine | Builds; smoother unit-tested; render graph tested headlessly on synthetic faces (lips recoloured, teeth and background untouched, depth-correct on a 30° turn) |
 | Android | Compiles against API stubs (`tools/android-stubcheck/check.sh`); Kotlin smoother output identical to the tested TS version. Needs a Gradle build and on-device testing |
 | iOS | Written against the WebRTC / MediaPipe / Metal APIs; not compiled here (no Xcode). Needs on-device testing |

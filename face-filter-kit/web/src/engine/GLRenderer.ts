@@ -20,6 +20,10 @@ export interface FaceGeometry {
   lipRef: [number, number];
   /** Inter-ocular distance in pixels (drives smoothing radius). */
   iodPx: number;
+  /** Face reshape ops for this frame (see warp.ts); count 0 = no reshape. */
+  warpA?: Float32Array;
+  warpB?: Float32Array;
+  warpCount?: number;
 }
 
 export interface RenderOptions {
@@ -213,7 +217,23 @@ export class GLRenderer {
     this.bindTex(3, this.quarter.tex, u.uBlur);
     gl.uniform2f(u.uTexel, 1 / W, 1 / H);
     gl.uniform1f(u.uFade, faceOn ? opt.fade : 0);
-    const L = params.lips, B = params.blush, S = params.skin;
+    const L = params.lips, B = params.blush, S = params.skin, T = params.tone;
+    const tone = T.enabled ? T : null;
+    const warps = faceOn && face?.warpCount ? face.warpCount : 0;
+    gl.uniform2f(u.uSize, W, H);
+    gl.uniform1i(u.uWarpCount, warps);
+    if (warps && face?.warpA && face.warpB) {
+      gl.uniform4fv(u["uWarpA[0]"], face.warpA);
+      gl.uniform2fv(u["uWarpB[0]"], face.warpB);
+    }
+    gl.uniform1f(u.uTan, S.enabled ? S.tan : 0);
+    gl.uniform1f(u.uWarmth, tone ? tone.warmth : 0);
+    gl.uniform1f(u.uSaturation, tone ? tone.saturation : 0);
+    gl.uniform1f(u.uContrast, tone ? tone.contrast : 0);
+    gl.uniform1f(u.uExposure, tone ? tone.brightness : 0);
+    gl.uniform1f(u.uGlow, tone ? tone.glow : 0);
+    gl.uniform1f(u.uVignette, tone ? tone.vignette : 0);
+    gl.uniform1f(u.uSharpen, tone ? tone.sharpen : 0);
     gl.uniform3fv(u.uLipColor, L.color);
     gl.uniform1f(u.uLipOpacity, L.enabled ? L.opacity : 0);
     gl.uniform1f(u.uLipCoverage, L.coverage);

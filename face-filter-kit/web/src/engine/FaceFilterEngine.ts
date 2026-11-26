@@ -3,6 +3,7 @@ import { GLRenderer, type FaceGeometry } from "./GLRenderer";
 import { LandmarkSmoother, DEFAULT_ONE_EURO, type OneEuroOptions } from "./OneEuro";
 import { GROUPS, LIP_LANDMARKS } from "./faceMeshData";
 import { DEFAULT_PARAMS, type FilterParams, type FrameStats } from "./types";
+import { buildWarps, MAX_WARPS } from "./warp";
 
 export interface EngineOptions {
   wasmBase: string;            // folder with MediaPipe wasm files
@@ -30,6 +31,8 @@ export class FaceFilterEngine {
   private raw = new Float32Array(N * 3);
   private smoothed = new Float32Array(N * 3);
   private norm = new Float32Array(N * 3);
+  private warpA = new Float32Array(MAX_WARPS * 4);
+  private warpB = new Float32Array(MAX_WARPS * 2);
   private haveFace = false;
   private missing = 0;
   private fade = 0;
@@ -72,6 +75,8 @@ export class FaceFilterEngine {
       lips: { ...this.params.lips, ...p.lips },
       blush: { ...this.params.blush, ...p.blush },
       skin: { ...this.params.skin, ...p.skin },
+      shape: { ...this.params.shape, ...p.shape },
+      tone: { ...this.params.tone, ...p.tone },
     };
   }
   getParams(): FilterParams { return structuredClone(this.params); }
@@ -157,11 +162,15 @@ export class FaceFilterEngine {
     const dR = Math.abs(o[cR * 3] - o[nose * 3]), dL = Math.abs(o[cL * 3] - o[nose * 3]);
     const c = dR > dL ? cR : cL;
     const [l1, l2] = GROUPS.lowerLipBody;
+    const iodPx = this.iod(s);
     return {
+      warpA: this.warpA,
+      warpB: this.warpB,
+      warpCount: buildWarps(s, iodPx, this.params.shape, this.fade, this.warpA, this.warpB),
       points: o,
       skinRef: [o[c * 3], o[c * 3 + 1]],
       lipRef: [(o[l1 * 3] + o[l2 * 3]) / 2, (o[l1 * 3 + 1] + o[l2 * 3 + 1]) / 2],
-      iodPx: this.iod(s),
+      iodPx,
     };
   }
 }

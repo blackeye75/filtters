@@ -111,6 +111,7 @@ Each phase ends at a gate. Don't start the next phase until the gate passes.
 | Date | ID | Decision | By | Notes |
 | --- | --- | --- | --- | --- |
 | 2026-11-26 | — | Architecture: frame-synchronous native processor inside react-native-webrtc capture path; MediaPipe VIDEO mode; One Euro smoothing; UV-mesh makeup; shared GLSL (web/Android) + Metal port | Design | See docs/DESIGN.md |
+| 2026-11-26 | — | Added face reshape (landmark-driven warp in composite.frag, `web/src/engine/warp.ts`), colour grade + bronze, and full-look presets (Sunkissed, Golden Hour, Soft Glam, Doll, Clean Girl, Sculpt). New uniforms are no-ops at 0 | Product request | **Web only so far.** Android must build warp ops with a Kotlin port of warp.ts and set the new uniforms; iOS `Shaders.metal` needs the same composite changes. Until then native applies only the lips/blush/skin part of the new presets |
 
 ## 6. Open questions for the product owner
 

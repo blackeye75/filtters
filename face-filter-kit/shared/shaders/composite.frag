@@ -1,6 +1,7 @@
 #version 300 es
-// Final pass: skin smoothing, blush, lips. All blending happens in linear light so colours
-// mix like real pigment and highlights stay white. One pass, full resolution.
+// Final pass: face reshape (warp), skin smoothing, blush, lips, colour grade. All blending happens
+// in linear light so colours mix like real pigment and highlights stay white. One pass, full res.
+// Every new control is a no-op at 0, so renderers that never set those uniforms are unchanged.
 precision highp float;
 
 in vec2 vUv;
@@ -30,6 +31,24 @@ uniform float uSmoothAmount; // 0..1
 uniform float uPoreKeep;     // 0..1, fine skin texture kept after smoothing
 uniform float uBrighten;     // 0..1
 
+uniform float uTan;          // 0..1 warm bronze on skin tones
+
+// Face reshape, built from THIS frame's landmarks (web/src/engine/warp.ts documents the maths)
+#define MAX_WARPS 20
+uniform vec2 uSize;          // full-res size in px
+uniform int  uWarpCount;
+uniform vec4 uWarpA[MAX_WARPS]; // center px xy, radius px, scale
+uniform vec2 uWarpB[MAX_WARPS]; // move px
+
+// Colour grade (whole picture)
+uniform float uWarmth;       // -1..1
+uniform float uSaturation;   // -1..1
+uniform float uContrast;     // -1..1 (negative = matte, lifted blacks)
+uniform float uExposure;     // -1..1
+uniform float uGlow;         // 0..1
+uniform float uVignette;     // 0..1
+uniform float uSharpen;      // 0..1
+
 uniform float uSplit;        // before/after divider in image x (0 = all filtered)
 uniform int   uDebug;        // 1 = show masks
 
@@ -47,27 +66,57 @@ float skinProb(vec3 srgb) {
   return (1.0 - smoothstep(0.9, 1.7, d)) * smoothstep(0.04, 0.12, y);
 }
 
+// Output pixel samples the source at p - sum(w * (move + scale * (p - center))).
+vec2 warpUv(vec2 uv) {
+  if (uWarpCount <= 0) return uv;
+  vec2 p = uv * uSize;
+  vec2 d = vec2(0.0);
+  for (int i = 0; i < MAX_WARPS; i++) {
+    if (i >= uWarpCount) break;
+    vec4 a = uWarpA[i];
+    vec2 q = p - a.xy;
+    float t = dot(q, q) / (a.z * a.z);
+    if (t < 1.0) { float w = (1.0 - t) * (1.0 - t); d += w * (uWarpB[i] + a.w * q); }
+  }
+  return (p - d) / uSize;
+}
+
 void main() {
-  vec2 uv = vUv;
+  if (vUv.x < uSplit && uDebug != 1) { outColor = vec4(texture(uFrame, vUv).rgb, 1.0); return; }
+
+  // Every lookup below uses the warped uv, so makeup moves with the reshaped face.
+  vec2 uv = warpUv(vUv);
   vec3 src = texture(uFrame, uv).rgb;
   vec4 m = texture(uMask, uv);
 
   if (uDebug == 1) { outColor = vec4(mix(src * 0.35, m.rgb, 0.8), 1.0); return; }
-  if (uv.x < uSplit) { outColor = vec4(src, 1.0); return; }
 
   vec3 c = toLin(src);
 
-  // ---------------------------------------------------------------- skin smoothing
+  // ---------------------------------------------------------------- detail (sharpen + pores)
   float k = m.b * uSmoothAmount * uFade;
+  vec3 fine = vec3(0.0);                        // pores and fine texture
+  if (k > 0.002 || uSharpen > 0.0) {
+    vec3 n = toLin(0.25 * (texture(uFrame, uv + vec2(uTexel.x, 0.0)).rgb + texture(uFrame, uv - vec2(uTexel.x, 0.0)).rgb +
+                           texture(uFrame, uv + vec2(0.0, uTexel.y)).rgb + texture(uFrame, uv - vec2(0.0, uTexel.y)).rgb));
+    fine = c - n;
+    c = max(c + fine * uSharpen * 1.5, 0.0);    // skin smoothing below replaces it on skin
+  }
+
+  // ---------------------------------------------------------------- skin smoothing
   if (k > 0.002) {
     k *= skinProb(src);
     vec3 s = toLin(texture(uSmooth, uv).rgb);
-    vec3 n = toLin(0.25 * (texture(uFrame, uv + vec2(uTexel.x, 0.0)).rgb + texture(uFrame, uv - vec2(uTexel.x, 0.0)).rgb +
-                           texture(uFrame, uv + vec2(0.0, uTexel.y)).rgb + texture(uFrame, uv - vec2(0.0, uTexel.y)).rgb));
-    vec3 fine = c - n;                          // pores and fine texture: keep some, or skin looks plastic
-    vec3 sm = s + fine * uPoreKeep;
+    vec3 sm = s + fine * uPoreKeep;             // keep some pores, or skin looks plastic
     sm = mix(sm, sm * 1.07 + 0.003, uBrighten); // gentle lift
     c = mix(c, max(sm, 0.0), k);
+  }
+
+  // ---------------------------------------------------------------- bronze
+  // All skin-coloured pixels (face, neck, shoulders), so there is no seam at the jaw.
+  if (uTan > 0.0) {
+    float tw = uTan * skinProb(src) * mix(0.6, 1.0, m.b);
+    c *= mix(vec3(1.0), vec3(0.93, 0.74, 0.55), tw * 0.8);
   }
 
   // ---------------------------------------------------------------- blush
@@ -118,5 +167,21 @@ void main() {
     c = mix(c, clamp(lipRgb, 0.0, 1.0), lA);
   }
 
-  outColor = vec4(toSrgb(c), 1.0);
+  // ---------------------------------------------------------------- colour grade
+  if (uWarmth != 0.0) c *= vec3(1.0 + 0.16 * uWarmth, 1.0 + 0.03 * uWarmth, 1.0 - 0.18 * uWarmth);
+  if (uExposure != 0.0) c *= exp2(uExposure * 0.6);
+  if (uGlow > 0.0) {                              // screen in the blurred highlights
+    vec3 bl = toLin(texture(uBlur, uv).rgb);
+    vec3 g = bl * smoothstep(0.08, 0.7, luma(bl)) * uGlow * 0.7;
+    c = 1.0 - (1.0 - clamp(c, 0.0, 1.0)) * (1.0 - g);
+  }
+  vec3 o = clamp(toSrgb(c), 0.0, 1.0);            // contrast and saturation read better in sRGB
+  if (uContrast > 0.0) o = mix(o, o * o * (3.0 - 2.0 * o), uContrast);
+  else if (uContrast < 0.0) o = mix(o, vec3(0.5), -0.35 * uContrast);
+  if (uSaturation != 0.0) o = clamp(mix(vec3(luma(o)), o, 1.0 + uSaturation), 0.0, 1.0);
+  if (uVignette > 0.0) {
+    vec2 vq = (vUv - 0.5) * vec2(uSize.x / max(uSize.y, 1.0), 1.0);
+    o *= 1.0 - uVignette * 0.55 * smoothstep(0.3, 0.95, length(vq));
+  }
+  outColor = vec4(o, 1.0);
 }

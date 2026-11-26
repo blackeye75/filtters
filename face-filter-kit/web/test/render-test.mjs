@@ -24,6 +24,7 @@ try {
   for (const [name, r] of Object.entries(res)) {
     writeFileSync(`test/out/${name}_filtered.png`, Buffer.from(r.filtered.split(",")[1], "base64"));
     writeFileSync(`test/out/${name}_masks.png`, Buffer.from(r.masks.split(",")[1], "base64"));
+    for (const [look, url] of Object.entries(r.looks)) writeFileSync(`test/out/${name}_${look.replace(" ", "_")}.png`, Buffer.from(url.split(",")[1], "base64"));
     const lipShift = dist(r.before.lip, r.after.lip), teethShift = dist(r.before.teeth, r.after.teeth), bgShift = dist(r.before.bg, r.after.bg);
     console.log(`${name.padEnd(11)} lip ${JSON.stringify(r.before.lip)} -> ${JSON.stringify(r.after.lip)} (Δ${lipShift.toFixed(0)})  teeth Δ${teethShift.toFixed(1)}  background Δ${bgShift.toFixed(1)}  glError ${r.glError}`);
     assert.equal(r.glError, 0, `${name}: GL error`);

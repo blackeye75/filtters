@@ -1,6 +1,6 @@
 import { FaceFilterEngine } from "./engine/FaceFilterEngine";
 import { createFilteredTrack } from "./engine/outputStream";
-import { PRESETS, toHex, hex, type FilterParams, type RGB } from "./engine/types";
+import { PRESETS, presetParams, toHex, hex, type FilterParams, type RGB } from "./engine/types";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const canvas = $("out") as HTMLCanvasElement;
@@ -69,7 +69,7 @@ function bindUi(engine: FaceFilterEngine) {
   const presetBox = $("presets");
   const sync = () => {
     const p = engine.getParams();
-    for (const group of ["lips", "blush", "skin"] as const) {
+    for (const group of ["lips", "blush", "skin", "shape", "tone"] as const) {
       for (const [key, value] of Object.entries(p[group])) {
         const el = document.getElementById(`${group}.${key}`) as HTMLInputElement | null;
         if (!el) continue;
@@ -86,10 +86,9 @@ function bindUi(engine: FaceFilterEngine) {
 
   for (const [name, preset] of Object.entries(PRESETS)) {
     const b = document.createElement("button");
-    b.innerHTML = `<span class="sw" style="background:${toHex(preset.lips.color as RGB)}"></span>${name}`;
+    b.innerHTML = `<span class="sw" style="background:${toHex(presetParams(preset).lips.color)}"></span>${name}`;
     b.onclick = () => {
-      const cur = engine.getParams();
-      engine.setParams({ lips: { ...cur.lips, ...preset.lips }, blush: { ...cur.blush, ...preset.blush } });
+      engine.setParams(presetParams(preset));
       presetBox.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
       sync();
     };

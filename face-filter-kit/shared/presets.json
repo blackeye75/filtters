@@ -26,7 +26,27 @@
    "enabled": true,
    "smooth": 0.5,
    "poreKeep": 0.35,
-   "brighten": 0.25
+   "brighten": 0.25,
+   "tan": 0
+  },
+  "shape": {
+   "enabled": true,
+   "faceSlim": 0,
+   "vLine": 0,
+   "chin": 0,
+   "noseSlim": 0,
+   "eyes": 0,
+   "lipPlump": 0
+  },
+  "tone": {
+   "enabled": true,
+   "warmth": 0,
+   "saturation": 0,
+   "contrast": 0,
+   "brightness": 0,
+   "glow": 0,
+   "vignette": 0,
+   "sharpen": 0
   }
  },
  "presets": {
@@ -148,6 +168,235 @@
      0.4549
     ],
     "intensity": 0.25
+   }
+  },
+  "Sunkissed": {
+   "lips": {
+    "color": [
+     0.8314,
+     0.3843,
+     0.3725
+    ],
+    "opacity": 0.6,
+    "coverage": 0.4,
+    "gloss": 0.8
+   },
+   "blush": {
+    "color": [
+     0.949,
+     0.502,
+     0.3725
+    ],
+    "intensity": 0.45
+   },
+   "skin": {
+    "smooth": 0.55,
+    "poreKeep": 0.4,
+    "brighten": 0.2,
+    "tan": 0.35
+   },
+   "shape": {
+    "faceSlim": 0.35,
+    "vLine": 0.25,
+    "noseSlim": 0.3,
+    "eyes": 0.2,
+    "lipPlump": 0.15
+   },
+   "tone": {
+    "warmth": 0.45,
+    "saturation": 0.15,
+    "contrast": 0.1,
+    "brightness": 0.05,
+    "glow": 0.35,
+    "vignette": 0.2
+   }
+  },
+  "Golden Hour": {
+   "lips": {
+    "color": [
+     0.7843,
+     0.4,
+     0.3529
+    ],
+    "opacity": 0.5,
+    "coverage": 0.35,
+    "gloss": 0.6
+   },
+   "blush": {
+    "color": [
+     0.9529,
+     0.6039,
+     0.4314
+    ],
+    "intensity": 0.35
+   },
+   "skin": {
+    "smooth": 0.5,
+    "brighten": 0.3,
+    "tan": 0.2
+   },
+   "shape": {
+    "faceSlim": 0.2,
+    "eyes": 0.15
+   },
+   "tone": {
+    "warmth": 0.7,
+    "saturation": 0.1,
+    "contrast": -0.15,
+    "brightness": 0.1,
+    "glow": 0.55,
+    "vignette": 0.3
+   }
+  },
+  "Soft Glam": {
+   "lips": {
+    "color": [
+     0.7529,
+     0.3373,
+     0.4314
+    ],
+    "opacity": 0.7,
+    "coverage": 0.55,
+    "gloss": 0.55
+   },
+   "blush": {
+    "color": [
+     0.9412,
+     0.5412,
+     0.6039
+    ],
+    "intensity": 0.4
+   },
+   "skin": {
+    "smooth": 0.65,
+    "poreKeep": 0.3,
+    "brighten": 0.35
+   },
+   "shape": {
+    "faceSlim": 0.4,
+    "vLine": 0.35,
+    "chin": 0.15,
+    "noseSlim": 0.35,
+    "eyes": 0.3,
+    "lipPlump": 0.2
+   },
+   "tone": {
+    "warmth": 0.1,
+    "saturation": 0.05,
+    "glow": 0.25,
+    "sharpen": 0.2
+   }
+  },
+  "Doll": {
+   "lips": {
+    "color": [
+     0.8784,
+     0.3765,
+     0.4784
+    ],
+    "opacity": 0.75,
+    "coverage": 0.6,
+    "gloss": 0.9
+   },
+   "blush": {
+    "color": [
+     1,
+     0.5608,
+     0.6392
+    ],
+    "intensity": 0.6
+   },
+   "skin": {
+    "smooth": 0.75,
+    "poreKeep": 0.2,
+    "brighten": 0.45
+   },
+   "shape": {
+    "faceSlim": 0.5,
+    "vLine": 0.4,
+    "chin": -0.2,
+    "noseSlim": 0.55,
+    "eyes": 0.6,
+    "lipPlump": 0.25
+   },
+   "tone": {
+    "warmth": -0.05,
+    "saturation": 0.1,
+    "brightness": 0.1,
+    "glow": 0.3
+   }
+  },
+  "Clean Girl": {
+   "lips": {
+    "color": [
+     0.7255,
+     0.4784,
+     0.4392
+    ],
+    "opacity": 0.5,
+    "coverage": 0.3,
+    "gloss": 0.75
+   },
+   "blush": {
+    "color": [
+     0.9333,
+     0.6275,
+     0.5569
+    ],
+    "intensity": 0.2
+   },
+   "skin": {
+    "smooth": 0.4,
+    "poreKeep": 0.5,
+    "brighten": 0.2
+   },
+   "shape": {
+    "faceSlim": 0.15,
+    "noseSlim": 0.15
+   },
+   "tone": {
+    "warmth": 0.1,
+    "contrast": 0.1,
+    "sharpen": 0.35
+   }
+  },
+  "Sculpt": {
+   "lips": {
+    "color": [
+     0.6588,
+     0.3529,
+     0.3333
+    ],
+    "opacity": 0.65,
+    "coverage": 0.6,
+    "gloss": 0.3
+   },
+   "blush": {
+    "color": [
+     0.8431,
+     0.4902,
+     0.4157
+    ],
+    "intensity": 0.3
+   },
+   "skin": {
+    "smooth": 0.5,
+    "brighten": 0.15,
+    "tan": 0.25
+   },
+   "shape": {
+    "faceSlim": 0.5,
+    "vLine": 0.6,
+    "chin": 0.2,
+    "noseSlim": 0.45,
+    "eyes": 0.15
+   },
+   "tone": {
+    "warmth": 0.15,
+    "saturation": 0.05,
+    "contrast": 0.2,
+    "sharpen": 0.3,
+    "vignette": 0.25
    }
   }
  }
